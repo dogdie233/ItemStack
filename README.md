@@ -18,5 +18,32 @@
 | give(`server_interface`server, `str`player_name) | 将该物品栈给予`player` | 无 |
 
 ### ItemMeta - 物品元数据
+懒得写了(不会写)
+## Example - 例子
+###当玩家进入服务器时给予一根击退棒
+```python
+from plugins.ItemStack import *
+from utils import rtext
 
-# lazy to update - 自行摸索⑧
+
+def on_player_joined(server, player):
+	qwq = ItemStack("minecraft:stick", 1) # 1根木棍(minecraft:stick)
+	name = rtext.RTextList(rtext.RText("击", color=rtext.RColor.red, styles=rtext.RStyle.bold),
+                           rtext.RText("退", color=rtext.RColor.green, styles=rtext.RStyle.italic),
+                           rtext.RText("棒", color=rtext.RColor.blue, styles=rtext.RStyle.bold))
+    qwq.get_meta()\
+	.set_display_name(name)\ # 设置物品名字
+		.add_enchantments(Enchantment.KNOCKBACK, 100)\ # 击退100
+		.add_enchantments(Enchantment.SHARPNESS, 50) # 锋利50
+	qwq.give(server, player) # 给予玩家
+```
+长这样
+![击退棒](https://github.com/dogdie233/ItemStack/blob/master/%E7%89%A9%E5%93%81%E5%B1%95%E7%A4%BA.png?raw=true "击退棒")
+
+## 更新计划
+- 物品Lore
+- 玩家头颅
+- 还有很多
+
+## lazy to update - 自行摸索⑧
+### 有bug发issues
