@@ -11,7 +11,7 @@ class ItemStack:
     def __init__(self, material, number):
         self.material = material
         self.number = number
-        self.meta = ItemMeta({})
+        self.meta = ItemMeta()
 
     def get_material(self):
         return self.materia
@@ -42,23 +42,13 @@ class ItemStack:
         raise TypeError("set_meta() argument must be a ItemMeta, not '" + str(type(meta)) + "'")
 
     def give(self, server, player):
-        print ("give {0} {1}{2} {3}".format(player, self.material, self.meta.to_nbt_string(), str(self.number)))
-        server.execute("give {0} {1}{2} {3}".format(player, self.material, self.meta.to_nbt_string(), str(self.number)))
+        print ("give {0} {1}{2} {3}".format(player, self.material, self.meta.to_nbt_string().replace("\\", "\\\\"), str(self.number)))
+        server.execute("give {0} {1}{2} {3}".format(player, self.material, self.meta.to_nbt_string().replace("\\", "\\\\"), str(self.number)))
 
 
 class ItemMeta:
-    def __init__(self, nbt={}):
-        if type(nbt) == str:
-            self.nbt = json.loads(nbt)
-        elif type(nbt) == dict:
-            self.nbt = nbt
-        else:
-            raise TypeError("argument must be a ItemMeta or a string, not '" + str(type(nbt)) + "'")
-        self.display_name = None
-        try:
-            self.display_name = nbt["display"]["Name"]
-        except:
-            pass
+    def __init__(self):
+        self.nbt = {}
 
     def get_enchantments(self):
         if "Enchantments" in self.nbt.keys():
@@ -92,26 +82,58 @@ class ItemMeta:
         return self
 
     def get_display_name(self):
-        return self.display_name
+        try:
+            return self.nbt["display"]["Name"]
+        except:
+            self.nbt["display"] = {}
+            self.nbt["display"]["Name"] = []
+            return []
 
     def set_display_name(self, name):
+        if "display" not in self.nbt.keys():
+            self.nbt["display"] = {}
         if type(name) == str:
-            self.display_name = [{"text": name}]
+            self.nbt["display"]["Name"] = [{"text": name}]
         elif isinstance(name, rtext.RTextBase):
-            self.display_name = name.to_json_object()
+            self.nbt["display"]["Name"] = name.to_json_object()
         else:
             raise TypeError("name argument must be a str or RTextBase, not '" + str(type(name)) + "'")
         return self
 
+    def get_lore(self):
+        try:
+            return self.nbt["display"]["Lore"]
+        except:
+            self.nbt["display"] = {}
+            self.nbt["display"]["Lore"] = []
+            return []
+
+    def set_lore(self, lines):
+        if "display" not in self.nbt.keys():
+            self.nbt["display"] = {}
+        if type(lines) == list:
+            lines2 = []
+            for l in lines:
+                if isinstance(l, rtext.RTextBase):
+                    lines2.append(l.to_json_object())
+                else:
+                    lines2.append(l)
+            self.nbt["display"]["Lore"] = lines2
+        elif isinstance(lines, rtext.RTextBase):
+            self.nbt["display"]["Lore"] = [lines.to_json_object()]
+        else:
+            raise TypeError("name argument must be a str or RTextBase, not '" + str(type(lines)) + "'")
+        return self
+
     def to_nbt_string(self):
-        self.nbt["display"] = {}
-        name_random = str(random.randint(0, 999999))
-        self.nbt["display"]["Name"] = "%aba{0}aba%".format(name_random)
         result = json.dumps(self.nbt, cls=JsonCustomEncoder)
 
         # 处理屑mojang的物品名单引号
-        result = result.replace("\"%aba{0}aba%\"".format(name_random), "'" + json.dumps(self.display_name, ensure_ascii=False) + "'")
-
+        if "display" in self.nbt.keys():
+            if "Name" in self.nbt["display"].keys():
+                result = result.replace('"' + json.dumps(self.nbt["display"]["Name"], ensure_ascii=False) + '"', "'" + json.dumps(self.nbt["display"]["Name"], ensure_ascii=False) + "'")
+            if "Lore" in self.nbt["display"].keys():
+                result = result.replace('"' + json.dumps(self.nbt["display"]["Name"], ensure_ascii=False) + '"', "'" + json.dumps(self.nbt["display"]["Lore"], ensure_ascii=False) + "'")
         return result
 
 
