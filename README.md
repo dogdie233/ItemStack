@@ -41,8 +41,10 @@ def on_player_joined(server, player):
 ![击退棒](https://github.com/dogdie233/ItemStack/blob/master/%E7%89%A9%E5%93%81%E5%B1%95%E7%A4%BA.png?raw=true "击退棒")
 
 ## 更新计划
-- 物品Lore
 - 玩家头颅
+- 物品属性
+- 书
+- 工具耐久
 - 还有很多
 
 ## lazy to update - 自行摸索⑧
